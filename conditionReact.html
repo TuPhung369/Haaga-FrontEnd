@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Conditional Rendering in React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Load React & Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+
+    <!-- React Component Script -->
+    <script type="text/babel">
+      function TextComponent(props) {
+        return <h1>{props.text.length <= 5 ? props.text : "Too long"}</h1>;
+      }
+
+      const userText = window.prompt("Enter text");
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<TextComponent text={userText} />);
+    </script>
+  </body>
+</html>
