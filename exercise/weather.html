@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weather / React</title>
+  </head>
+  <body>
+    <!-- We will put our React component inside this div. -->
+    <div id="root"></div>
+
+    <!-- Load React & Babel -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+
+    <!-- React component code -->
+    <script type="text/babel">
+
+      function WeatherApp() {
+        const [weather, setWeather] = React.useState(null);
+        const [error, setError] = React.useState(null);
+        const [loading, setLoading] = React.useState(false);
+        const [city, setCity] = React.useState("Helsinki");
+        const API_KEY = "e7fbea0f0d00261cd579a9e1c9d511d2";
+        React.useEffect(() => {
+          fetchWeather();
+        }, []);
+        const fetchWeather = () => {
+          setLoading(true);
+          setError(null);
+          
+          fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&APPID=${API_KEY}`)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error("City not found or API error");
+              }
+              return response.json();
+            })
+            .then(data => setWeather(data))
+            .catch(error => setError(error.message))
+            .finally(() => setLoading(false));
+        };
+      
+        return (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <h1>Weather App</h1>
+            <input 
+              type="text"
+              style={{ color: "red", marginRight: "10px", paddingLeft: "5px" }}
+              value={city} 
+              onChange={(e) => setCity(e.target.value)} 
+              placeholder="Enter city name" 
+            />
+            <button style={{ backgroundColor: "lightblue", color: "black", borderRadius: "9999px" }} onClick={fetchWeather} disabled={loading}>
+              {loading ? "Loading..." : "Get Weather"}
+            </button>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {weather && (
+              <div>
+                <h2>{weather.name}, {weather.sys.country}</h2>
+                <p><strong>Temperature:</strong> {weather.main.temp}°C</p>
+                <p><strong>Humidity:</strong> {weather.main.humidity}%</p>
+                <p><strong>Wind Speed:</strong> {weather.wind.speed} m/s</p>
+                <p><strong>Weather:</strong> {weather.weather[0].description}</p>
+                <img 
+                  src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} 
+                  alt={weather.weather[0].description} 
+                />
+              </div>
+            )}
+          </div>
+        );
+      }
+      
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<WeatherApp />);
+      
+</script>
+  </body>
+</html>
