@@ -26,7 +26,7 @@ export default function TodoList() {
 
   return (
     <div className="max-w-md mx-auto p-4 bg-white rounded-2xl shadow-lg">
-      <h2 className="text-xl font-bold mb-4">To-Do List</h2>
+      <h2 className="text-xl font-bold mb-4 text-blue-900">ToDo List</h2>
       <div className="flex gap-2 mb-4">
         <Input
           value={task}
