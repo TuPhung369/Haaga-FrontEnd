@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Input, Button, DatePicker } from "antd";
 import { Trash2 } from "lucide-react";
+import moment from "moment";
 
 interface Todo {
   id: number;
@@ -31,7 +32,7 @@ export default function TodoList() {
         <Input
           value={task}
           onChange={(e) => setTask(e.target.value)}
-          placeholder="Add a new task"
+          placeholder="Add a New Task"
         />
         <DatePicker
           onChange={(_, dateString) =>
@@ -40,25 +41,37 @@ export default function TodoList() {
         />
         <Button onClick={addTodo}>Add</Button>
       </div>
-      <ul>
-        {todos.map((todo) => (
-          <li
-            key={todo.id}
-            className="flex justify-between items-center bg-gray-100 p-2 rounded-lg mb-2 gap-4"
-          >
-            <span className="flex-grow text-blue-600">
-              {todo.text} - {todo.date}
-            </span>
-            <Button
-              variant="filled"
-              size="small"
-              onClick={() => removeTodo(todo.id)}
-            >
-              <Trash2 className="w-5 h-5 text-red-500" />
-            </Button>
-          </li>
-        ))}
-      </ul>
+
+      <table className="min-w-full table-auto">
+        <thead>
+          <tr>
+            <th className="font-bold text-black">Date</th>
+            <th className="font-bold text-black">Description</th>
+            <th className="font-bold text-black">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {todos.map((todo) => {
+            const formattedDate = moment(todo.date).format("DD.MM.YYYY");
+            return (
+              <tr key={todo.id} className="border-b">
+                <td className="py-2 px-4 text-blue-600">{formattedDate}</td>
+                <td className="py-2 px-4 text-blue-600">{todo.text}</td>
+                <td className="py-2 px-4 text-blue-600">
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    className="bg-transparent border-none"
+                    onClick={() => removeTodo(todo.id)}
+                  >
+                    <Trash2 className="w-5 h-5 text-red-500" />
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
