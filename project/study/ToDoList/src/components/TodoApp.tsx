@@ -36,6 +36,7 @@ export default function TodoApp() {
         />
         <DatePicker
           value={date ? moment(date, "YYYY-MM-DD") : null}
+          style = {{ width: 250 }}
           onChange={(_, dateString) =>
             setDate(Array.isArray(dateString) ? dateString[0] : dateString)
           }
