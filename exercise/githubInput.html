@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>GitHub Repository Search</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+
+    <script type="text/babel">
+      const { useState } = React;
+
+function GitHubSearch() {
+  const [keyword, setKeyword] = useState("");
+  const [repositories, setRepositories] = useState([]);
+
+  const fetchRepositories = () => {
+    fetch(`https://api.github.com/search/repositories?q=${keyword}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.items) {
+          setRepositories(data.items);
+        }
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+  };
+
+  return (
+    <div>
+      <h2>GitHub Repository Search</h2>
+      <input
+        type="text"
+        placeholder="Enter keyword..."
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
+      />
+      <button onClick={fetchRepositories}>Search</button>
+
+      <table border="0" cellpadding="5">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {repositories.map((repo) => (
+            <tr key={repo.id}>
+              <td>{repo.full_name}</td>
+              <td>
+                <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
+                  {repo.html_url}
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Render component
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<GitHubSearch />);
+    </script>
+  </body>
+</html>

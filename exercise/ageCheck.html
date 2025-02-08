@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Front End Programming / React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+
+    <script type="text/babel">
+      function AgeChecker() {
+        const [name, setName] = React.useState("");
+        const [age, setAge] = React.useState("");
+        const [message, setMessage] = React.useState("");
+
+        const handleCheck = () => {
+          if (age >= 18) {
+            setMessage(`Hello ${name}`);
+          } else {
+            setMessage("You are too young");
+          }
+        };
+
+        return (
+          <div>
+            <h1>Age Checker</h1>
+            <input 
+              type="text" 
+              placeholder="Enter your name" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+            />
+            <p><input 
+              type="number" 
+              placeholder="Enter your age" 
+              value={age} 
+              onChange={(e) => setAge(e.target.value)} 
+            /></p>
+            <p><button onClick={handleCheck}>Submit</button></p>
+            <p>{message}</p>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<AgeChecker />);
+    </script>
+  </body>
+</html>
