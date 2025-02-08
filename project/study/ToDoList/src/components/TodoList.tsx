@@ -35,6 +35,7 @@ export default function TodoList() {
           placeholder="Add a New Task"
         />
         <DatePicker
+          value={date ? moment(date, "YYYY-MM-DD") : null}
           onChange={(_, dateString) =>
             setDate(Array.isArray(dateString) ? dateString[0] : dateString)
           }

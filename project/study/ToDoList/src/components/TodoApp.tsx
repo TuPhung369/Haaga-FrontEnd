@@ -1,4 +1,5 @@
 import { useState } from "react";
+import moment from "moment";
 import { Input, Button, DatePicker } from "antd";
 import TodoTable from "./TodoTable"; // Import the TodoTable component
 
@@ -34,6 +35,7 @@ export default function TodoApp() {
           placeholder="Add a New Task"
         />
         <DatePicker
+          value={date ? moment(date, "YYYY-MM-DD") : null}
           onChange={(_, dateString) =>
             setDate(Array.isArray(dateString) ? dateString[0] : dateString)
           }

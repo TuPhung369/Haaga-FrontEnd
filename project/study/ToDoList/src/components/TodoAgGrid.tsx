@@ -30,11 +30,16 @@ export default function TodoAgGrid() {
 
   const addTodo = () => {
     if (!task.trim() || !date || !priority) return;
-    const newTodo = { id: Date.now(), text: task, date, priority };
+    const newTodo = {
+      id: Date.now(),
+      text: task,
+      date, // Store raw date from DatePicker
+      priority,
+    };
     setTodos((prevTodos) => [...prevTodos, newTodo]);
     setTask("");
     setDate("");
-    setPriority(""); // Clear priority after adding the task
+    setPriority("");
   };
 
   const removeTodo = (id: number) => {
@@ -48,24 +53,6 @@ export default function TodoAgGrid() {
       filter: "agDateColumnFilter",
       floatingFilter: true,
       sortable: true,
-      filterParams: {
-        comparator: (filterLocalDateAtMidnight: Date, cellValue: string) => {
-          const dateParts = cellValue.split("-");
-          const cellDate = new Date(
-            Number(dateParts[0]),
-            Number(dateParts[1]) - 1,
-            Number(dateParts[2])
-          );
-          if (filterLocalDateAtMidnight < cellDate) {
-            return -1;
-          } else if (filterLocalDateAtMidnight > cellDate) {
-            return 1;
-          }
-          return 0;
-        },
-      },
-      cellRenderer: (params: { value: string }) =>
-        moment(params.value).format("DD.MM.YYYY"),
     },
     {
       headerName: "Description",
@@ -110,9 +97,8 @@ export default function TodoAgGrid() {
         />
         <DatePicker
           style={{ width: 250 }}
-          onChange={(_, dateString) =>
-            setDate(Array.isArray(dateString) ? dateString[0] : dateString)
-          }
+          value={date ? moment(date) : null} // Keep as is
+          onChange={(_, dateString) => setDate(dateString)} // Store raw string
         />
         <Select
           value={priority}
