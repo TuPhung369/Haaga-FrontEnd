@@ -98,7 +98,9 @@ export default function TodoAgGrid() {
         <DatePicker
           style={{ width: 250 }}
           value={date ? moment(date) : null} // Keep as is
-          onChange={(_, dateString) => setDate(dateString)} // Store raw string
+          onChange={(_, dateString) =>
+            setDate(Array.isArray(dateString) ? dateString[0] : dateString)
+          } // Store raw string
         />
         <Select
           value={priority}
