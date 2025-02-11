@@ -5,7 +5,7 @@ import moment from "moment";
 
 interface Todo {
   id: number;
-  text: string;
+  description: string;
   date: string;
 }
 
@@ -16,7 +16,7 @@ export default function TodoList() {
 
   const addTodo = () => {
     if (!task.trim() || !date) return;
-    setTodos([...todos, { id: Date.now(), text: task, date }]);
+    setTodos([...todos, { id: Date.now(), description: task, date }]);
     setTask("");
     setDate("");
   };
@@ -58,7 +58,7 @@ export default function TodoList() {
             return (
               <tr key={todo.id} className="border-b">
                 <td className="py-2 px-4 text-blue-600">{formattedDate}</td>
-                <td className="py-2 px-4 text-blue-600">{todo.text}</td>
+                <td className="py-2 px-4 text-blue-600">{todo.description}</td>
                 <td className="py-2 px-4 text-blue-600">
                   <Button
                     variant="outlined"

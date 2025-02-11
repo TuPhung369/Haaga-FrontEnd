@@ -17,7 +17,7 @@ provideGlobalGridOptions({ theme: "legacy" });
 
 interface Todo {
   id: number;
-  text: string;
+  description: string;
   date: string;
   priority: string;
 }
@@ -32,7 +32,7 @@ export default function TodoAgGrid() {
     if (!task.trim() || !date || !priority) return;
     const newTodo = {
       id: Date.now(),
-      text: task,
+      description: task,
       date, // Store raw date from DatePicker
       priority,
     };

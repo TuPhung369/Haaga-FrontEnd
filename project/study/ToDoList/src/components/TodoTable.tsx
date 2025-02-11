@@ -5,7 +5,7 @@ import moment from "moment";
 
 interface Todo {
   id: number;
-  text: string;
+  description: string;
   date: string;
 }
 
@@ -30,7 +30,7 @@ const TodoTable: React.FC<TodoTableProps> = ({ todos, removeTodo }) => {
           return (
             <tr key={todo.id} className="border-b">
               <td className="py-2 px-4 text-blue-600">{formattedDate}</td>
-              <td className="py-2 px-4 text-blue-600">{todo.text}</td>
+              <td className="py-2 px-4 text-blue-600">{todo.description}</td>
               <td className="py-2 px-4 text-blue-600">
                 <Button
                   variant="outlined"

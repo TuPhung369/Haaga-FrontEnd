@@ -5,7 +5,7 @@ import TodoTable from "./TodoTable"; // Import the TodoTable component
 
 interface Todo {
   id: number;
-  text: string;
+  description: string;
   date: string;
 }
 
@@ -16,7 +16,7 @@ export default function TodoApp() {
 
   const addTodo = () => {
     if (!task.trim() || !date) return;
-    setTodos([...todos, { id: Date.now(), text: task, date }]);
+    setTodos([...todos, { id: Date.now(), description: task, date }]);
     setTask("");
     setDate("");
   };
@@ -36,7 +36,7 @@ export default function TodoApp() {
         />
         <DatePicker
           value={date ? moment(date, "YYYY-MM-DD") : null}
-          style = {{ width: 250 }}
+          style={{ width: 250 }}
           onChange={(_, dateString) =>
             setDate(Array.isArray(dateString) ? dateString[0] : dateString)
           }
