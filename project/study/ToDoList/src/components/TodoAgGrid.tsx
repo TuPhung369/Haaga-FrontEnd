@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { Input, Button, DatePicker, Select } from "antd";
-import { Trash2 } from "lucide-react";
+import { Input, Button, DatePicker, Select, message } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import {
@@ -9,7 +9,8 @@ import {
   ModuleRegistry,
   provideGlobalGridOptions,
 } from "ag-grid-community";
-import moment from "moment";
+import dayjs from "dayjs";
+// import customParseFormat from "dayjs/plugin/customParseFormat";
 
 // Register the ClientSideRowModel module before using AG Grid
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -28,22 +29,27 @@ export default function TodoAgGrid() {
   const [date, setDate] = useState<string>("");
   const [priority, setPriority] = useState<string>("");
 
-  const addTodo = () => {
-    if (!task.trim() || !date || !priority) return;
-    const newTodo = {
-      id: Date.now(),
-      description: task,
-      date, // Store raw date from DatePicker
-      priority,
-    };
-    setTodos((prevTodos) => [...prevTodos, newTodo]);
+  const addTodo = useCallback(() => {
+    if (!task.trim() || !date || !priority) {
+      message.warning(
+        "Please enter a task, select a date and choose the priority."
+      );
+      return;
+    }
+    setTodos((prevTodos) => [
+      ...prevTodos,
+      { id: Date.now(), description: task, date, priority },
+    ]);
     setTask("");
     setDate("");
     setPriority("");
-  };
+  }, [task, date, priority]);
 
-  const removeTodo = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  const removeTodo = useCallback((id: number) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  }, []);
+  const disabledDate = (current: dayjs.Dayjs | null) => {
+    return current ? current < dayjs().subtract(10, "year") : false;
   };
 
   const columns = [
@@ -56,7 +62,7 @@ export default function TodoAgGrid() {
     },
     {
       headerName: "Description",
-      field: "text" as keyof Todo,
+      field: "description" as keyof Todo,
       filter: "agTextColumnFilter",
       floatingFilter: true,
       sortable: true,
@@ -70,20 +76,23 @@ export default function TodoAgGrid() {
     },
     {
       headerName: "Action",
-      cellRenderer: (params: { data: Todo }) => (
-        <Button
-          size="small"
-          className="bg-transparent border-none"
-          onClick={() => removeTodo(params.data.id)}
-        >
-          <Trash2 className="w-5 h-5 text-red-500" />
-        </Button>
-      ),
+      cellRenderer: (params: { data: Todo }) => {
+        const { data } = params;
+        return (
+          <DeleteOutlined
+            onClick={() => removeTodo(data.id)}
+            className="w-5 h-5 text-red-500 cursor-pointer"
+          />
+        );
+      },
     },
   ];
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-2xl shadow-lg">
+    <div
+      style={{ width: "860px", margin: "0 auto" }}
+      className="p-4 bg-white rounded-2xl shadow-lg"
+    >
       <h2 className="text-xl font-bold mb-4 text-blue-900">
         ToDo AgGrid React
       </h2>
@@ -96,11 +105,15 @@ export default function TodoAgGrid() {
           placeholder="Add a New Task"
         />
         <DatePicker
-          style={{ width: 250 }}
-          value={date ? moment(date) : null} // Keep as is
-          onChange={(_, dateString) =>
-            setDate(Array.isArray(dateString) ? dateString[0] : dateString)
-          } // Store raw string
+          value={date ? dayjs(date, "DD.MM.YYYY") : null}
+          style={{ width: 255 }}
+          onChange={(date, dateString) => {
+            if (date) {
+              setDate(Array.isArray(dateString) ? dateString[0] : dateString);
+            }
+          }}
+          format="DD.MM.YYYY"
+          disabledDate={disabledDate}
         />
         <Select
           value={priority}

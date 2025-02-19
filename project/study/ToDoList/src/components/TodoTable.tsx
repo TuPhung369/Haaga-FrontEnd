@@ -1,7 +1,5 @@
 import React from "react";
-import { Button } from "antd";
-import { Trash2 } from "lucide-react";
-import moment from "moment";
+import { DeleteOutlined } from "@ant-design/icons";
 
 interface Todo {
   id: number;
@@ -26,20 +24,15 @@ const TodoTable: React.FC<TodoTableProps> = ({ todos, removeTodo }) => {
       </thead>
       <tbody>
         {todos.map((todo) => {
-          const formattedDate = moment(todo.date).format("DD.MM.YYYY");
           return (
             <tr key={todo.id} className="border-b">
-              <td className="py-2 px-4 text-blue-600">{formattedDate}</td>
+              <td className="py-2 px-4 text-blue-600">{todo.date}</td>
               <td className="py-2 px-4 text-blue-600">{todo.description}</td>
               <td className="py-2 px-4 text-blue-600">
-                <Button
-                  variant="outlined"
-                  size="small"
-                  className="bg-transparent border-none"
+                <DeleteOutlined
                   onClick={() => removeTodo(todo.id)}
-                >
-                  <Trash2 className="w-5 h-5 text-red-500" />
-                </Button>
+                  className="w-5 h-5 text-red-500 cursor-pointer"
+                />
               </td>
             </tr>
           );

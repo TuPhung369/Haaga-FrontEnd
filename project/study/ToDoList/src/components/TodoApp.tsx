@@ -1,6 +1,6 @@
-import { useState } from "react";
-import moment from "moment";
-import { Input, Button, DatePicker } from "antd";
+import { useState, useCallback} from "react";
+import dayjs from "dayjs";
+import { Input, Button, DatePicker, message } from "antd";
 import TodoTable from "./TodoTable"; // Import the TodoTable component
 
 interface Todo {
@@ -14,15 +14,24 @@ export default function TodoApp() {
   const [task, setTask] = useState("");
   const [date, setDate] = useState<string>("");
 
-  const addTodo = () => {
-    if (!task.trim() || !date) return;
-    setTodos([...todos, { id: Date.now(), description: task, date }]);
+  const addTodo = useCallback(() => {
+    if (!task.trim() || !date) {
+      message.warning("Please enter a task and select a date.");
+      return;
+    }
+    setTodos((prevTodos) => [
+      ...prevTodos,
+      { id: Date.now(), description: task, date },
+    ]);
     setTask("");
     setDate("");
-  };
+  }, [task, date]);
 
   const removeTodo = (id: number) => {
     setTodos(todos.filter((todo) => todo.id !== id));
+  };
+  const disabledDate = (current: dayjs.Dayjs | null) => {
+    return current ? current < dayjs().subtract(10, "year") : false;
   };
 
   return (
@@ -35,11 +44,15 @@ export default function TodoApp() {
           placeholder="Add a New Task"
         />
         <DatePicker
-          value={date ? moment(date, "YYYY-MM-DD") : null}
-          style={{ width: 250 }}
-          onChange={(_, dateString) =>
-            setDate(Array.isArray(dateString) ? dateString[0] : dateString)
-          }
+          value={date ? dayjs(date, "DD.MM.YYYY") : null}
+          style={{ width: 255 }}
+          onChange={(date, dateString) => {
+            if (date) {
+              setDate(Array.isArray(dateString) ? dateString[0] : dateString);
+            }
+          }}
+          format="DD.MM.YYYY"
+          disabledDate={disabledDate}
         />
         <Button onClick={addTodo}>Add</Button>
       </div>

@@ -1,7 +1,10 @@
-import { useState } from "react";
-import { Input, Button, DatePicker } from "antd";
-import { Trash2 } from "lucide-react";
-import moment from "moment";
+import { useState, useCallback } from "react";
+import { Input, Button, DatePicker, message } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 interface Todo {
   id: number;
@@ -14,15 +17,25 @@ export default function TodoList() {
   const [task, setTask] = useState("");
   const [date, setDate] = useState<string>("");
 
-  const addTodo = () => {
-    if (!task.trim() || !date) return;
-    setTodos([...todos, { id: Date.now(), description: task, date }]);
+  const addTodo = useCallback(() => {
+    if (!task.trim() || !date) {
+      message.warning("Please enter a task and select a date.");
+      return;
+    }
+    setTodos((prevTodos) => [
+      ...prevTodos,
+      { id: Date.now(), description: task, date },
+    ]);
     setTask("");
     setDate("");
-  };
+  }, [task, date]);
 
-  const removeTodo = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  const removeTodo = useCallback((id: number) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  }, []);
+
+  const disabledDate = (current: dayjs.Dayjs | null) => {
+    return current ? current < dayjs().subtract(10, "year") : false;
   };
 
   return (
@@ -35,11 +48,15 @@ export default function TodoList() {
           placeholder="Add a New Task"
         />
         <DatePicker
-          value={date ? moment(date, "YYYY-MM-DD") : null}
+          value={date ? dayjs(date, "DD.MM.YYYY") : null}
           style={{ width: 255 }}
-          onChange={(_, dateString) =>
-            setDate(Array.isArray(dateString) ? dateString[0] : dateString)
-          }
+          onChange={(date, dateString) => {
+            if (date) {
+              setDate(Array.isArray(dateString) ? dateString[0] : dateString);
+            }
+          }}
+          format="DD.MM.YYYY"
+          disabledDate={disabledDate}
         />
         <Button onClick={addTodo}>Add</Button>
       </div>
@@ -54,20 +71,15 @@ export default function TodoList() {
         </thead>
         <tbody>
           {todos.map((todo) => {
-            const formattedDate = moment(todo.date).format("DD.MM.YYYY");
             return (
               <tr key={todo.id} className="border-b">
-                <td className="py-2 px-4 text-blue-600">{formattedDate}</td>
+                <td className="py-2 px-4 text-blue-600">{todo.date}</td>
                 <td className="py-2 px-4 text-blue-600">{todo.description}</td>
                 <td className="py-2 px-4 text-blue-600">
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    className="bg-transparent border-none"
+                  <DeleteOutlined
                     onClick={() => removeTodo(todo.id)}
-                  >
-                    <Trash2 className="w-5 h-5 text-red-500" />
-                  </Button>
+                    className="w-5 h-5 text-red-500 cursor-pointer"
+                  />
                 </td>
               </tr>
             );
