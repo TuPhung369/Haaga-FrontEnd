@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { Input, Button, DatePicker, Select, message } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Input, Button, DatePicker, Select, message, Modal } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import {
@@ -10,9 +10,8 @@ import {
   provideGlobalGridOptions,
 } from "ag-grid-community";
 import dayjs from "dayjs";
-// import customParseFormat from "dayjs/plugin/customParseFormat";
 
-// Register the ClientSideRowModel module before using AG Grid
+// Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
 provideGlobalGridOptions({ theme: "legacy" });
 
@@ -29,6 +28,10 @@ export default function TodoAgGrid() {
   const [date, setDate] = useState<string>("");
   const [priority, setPriority] = useState<string>("");
 
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+
   const addTodo = useCallback(() => {
     if (!task.trim() || !date || !priority) {
       message.warning(
@@ -36,10 +39,13 @@ export default function TodoAgGrid() {
       );
       return;
     }
+
     setTodos((prevTodos) => [
       ...prevTodos,
       { id: Date.now(), description: task, date, priority },
     ]);
+
+    message.success("Task added successfully!");
     setTask("");
     setDate("");
     setPriority("");
@@ -47,7 +53,39 @@ export default function TodoAgGrid() {
 
   const removeTodo = useCallback((id: number) => {
     setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+    message.success("Task deleted successfully!");
   }, []);
+
+  const editTodo = useCallback((todo: Todo) => {
+    setTask(todo.description);
+    setDate(todo.date);
+    setPriority(todo.priority);
+    setEditId(todo.id);
+    setIsModalOpen(true);
+  }, []);
+
+  const saveEditedTodo = () => {
+    if (!task.trim() || !date || !priority) {
+      message.warning("Please enter all fields before saving.");
+      return;
+    }
+
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === editId
+          ? { ...todo, description: task, date, priority }
+          : todo
+      )
+    );
+
+    message.success("Task updated successfully!");
+    setIsModalOpen(false);
+    setEditId(null);
+    setTask("");
+    setDate("");
+    setPriority("");
+  };
+
   const disabledDate = (current: dayjs.Dayjs | null) => {
     return current ? current < dayjs().subtract(10, "year") : false;
   };
@@ -73,16 +111,31 @@ export default function TodoAgGrid() {
       filter: "agTextColumnFilter",
       floatingFilter: true,
       sortable: true,
+      cellStyle: (params: { value: string }) => {
+        if (params.value === "High")
+          return { color: "red", fontWeight: "bold" };
+        if (params.value === "Medium")
+          return { color: "orange", fontWeight: "bold" };
+        if (params.value === "Low")
+          return { color: "green", fontWeight: "bold" };
+        return {};
+      },
     },
     {
       headerName: "Action",
       cellRenderer: (params: { data: Todo }) => {
         const { data } = params;
         return (
-          <DeleteOutlined
-            onClick={() => removeTodo(data.id)}
-            className="w-5 h-5 text-red-500 cursor-pointer"
-          />
+          <div className="flex gap-2">
+            <EditOutlined
+              onClick={() => editTodo(data)}
+              className="w-5 h-5 text-blue-500 cursor-pointer"
+            />
+            <DeleteOutlined
+              onClick={() => removeTodo(data.id)}
+              className="w-5 h-5 text-red-500 cursor-pointer"
+            />
+          </div>
         );
       },
     },
@@ -116,10 +169,11 @@ export default function TodoAgGrid() {
           disabledDate={disabledDate}
         />
         <Select
-          value={priority}
+          value={priority || undefined}
           onChange={(value) => setPriority(value)}
-          style={{ width: 250 }}
+          style={{ width: 250, textAlign: "left" }}
           placeholder="Priority"
+          allowClear
         >
           <Select.Option value="High">High</Select.Option>
           <Select.Option value="Medium">Medium</Select.Option>
@@ -137,6 +191,45 @@ export default function TodoAgGrid() {
           domLayout="autoHeight"
         />
       </div>
+
+      {/* Modal for Editing */}
+      <Modal
+        title="Edit Task"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onOk={saveEditedTodo}
+        okText="Save"
+        cancelText="Cancel"
+      >
+        <div className="flex flex-col gap-3">
+          <Input
+            value={task}
+            onChange={(e) => setTask(e.target.value)}
+            placeholder="Task Description"
+          />
+          <DatePicker
+            value={date ? dayjs(date, "DD.MM.YYYY") : null}
+            onChange={(date, dateString) => {
+              if (date) {
+                setDate(Array.isArray(dateString) ? dateString[0] : dateString);
+              }
+            }}
+            format="DD.MM.YYYY"
+            disabledDate={disabledDate}
+            style={{ width: "100%" }}
+          />
+          <Select
+            value={priority || undefined}
+            onChange={(value) => setPriority(value)}
+            placeholder="Priority"
+            style={{ width: "100%" }}
+          >
+            <Select.Option value="High">High</Select.Option>
+            <Select.Option value="Medium">Medium</Select.Option>
+            <Select.Option value="Low">Low</Select.Option>
+          </Select>
+        </div>
+      </Modal>
     </div>
   );
 }
